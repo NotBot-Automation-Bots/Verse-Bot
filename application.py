@@ -85,7 +85,7 @@ def listen_to_playlist(user):
 
 @application.route("/list")
 def foo():
-    entries = list(db_operations.find())
+    entries = list(db_collections["IamOk"].find())
     verses = [entry['verse'] for entry in entries]
     print(verses)
     return "success"
