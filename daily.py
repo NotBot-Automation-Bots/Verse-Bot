@@ -24,7 +24,7 @@ scheduler = BlockingScheduler()
 
 @scheduler.scheduled_job("interval", seconds=10)
 def daily():
-    users = db_operations.find({"schedule": "Daily"})
+    users = db_operations.find({}, {"schedule": "Daily"})
     for user in users:
         _id = user["_id"]
         audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{user['ref']}.mp3"
