@@ -108,7 +108,7 @@ def create_schedule(user):
 def foo():
     entries = list(db_collections["IamOk"].find())
     verses = [entry['verse'] for entry in entries]
-    print(verses)
+    # print(verses)
     return "success"
 
 
@@ -147,7 +147,7 @@ def receive_message():
                         # Are there any Messenger ref values in the query parameter
                         if postback['referral'].get('ref'):
                             ref = postback['referral']['ref']
-                            print(ref)
+                            # print(ref)
                             updateUser = {"$set": {"ref": ref}}
                             db_operations.update_one(user, updateUser)
 
@@ -221,7 +221,7 @@ def receive_message():
                                 verse_doc['ref'] = collection_name
                                 break
 
-                        print(verse_doc)
+                        # print(verse_doc)
 
                         if verse_doc is not None:
                             verse = f"\"{verse_doc['verse']}\"\n{verse_doc['ReferenceLf']}, {verse_doc['version']}"
@@ -244,7 +244,7 @@ def receive_message():
                             db_operations.update_one(user, updateUser)
 
                             r = bot.send_button_message(recipient_id=recipient_id, text="Record this verse and your declaration", buttons=buttons)
-                            print(r)
+                            # print(r)
 
                     elif "Nice!" in prevBotMsg:
                         if userMessage.get("attachments"):
