@@ -22,9 +22,9 @@ db_collections['LetsDoThis'] = client.FbMessenger.LetsDoThis
 
 scheduler = BlockingScheduler()
 
-@scheduler.scheduled_job("interval", seconds=10)
+@scheduler.scheduled_job("cron", hour=12)
 def daily():
-    users = db_operations.find({}, {"schedule": "None"})
+    users = list(db_operations.find({}, {"schedule": "None"}))
     print(users)
     for user in users:
         _id = user["_id"]
