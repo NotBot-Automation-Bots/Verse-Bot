@@ -131,7 +131,7 @@ def receive_message():
                 recipient_id = message['sender']['id']
                 user = db_operations.find_one({'_id': int(recipient_id)})
                 if user is None:
-                    new_user = {'_id': int(recipient_id), 'prevBotMsg': "Foo"}
+                    new_user = {'_id': int(recipient_id), 'prevBotMsg': "Foo", "schedule": "None"}
                     db_operations.insert_one(new_user)
                     user = db_operations.find_one({'_id': int(recipient_id)})
                     update_user(user)
