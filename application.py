@@ -198,6 +198,24 @@ def receive_message():
                             }
                             db_operations.update_one(user, updateUser)
                             bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 12 PM")
+                        
+                        elif postbackTitle == "Two times a day":
+                            updateUser = {
+                                "$set": {
+                                    "schedule": "2"
+                                }
+                            }
+                            db_operations.update_one(user, updateUser)
+                            bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 6 AM and 6 PM")
+                        
+                        elif postbackTitle == "Three times a day":
+                            updateUser = {
+                                "$set": {
+                                    "schedule": "3"
+                                }
+                            }
+                            db_operations.update_one(user, updateUser)
+                            bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 6 AM, 12 PM, and 6 PM")
                     
                 elif message.get('message'):
                     userMessage = message['message']

@@ -23,8 +23,18 @@ db_collections['LetsDoThis'] = client.FbMessenger.LetsDoThis
 scheduler = BlockingScheduler()
 
 @scheduler.scheduled_job("cron", hour=12)
-def daily():
-    users = list(db_operations.find({}, {"schedule": "Daily"}))
+def t12():
+    users = list(db_operations.find({}, {
+        "$or":
+        [
+            {
+                'schedule': 'Daily'
+            },
+            {
+                'schedule': '3'
+            }
+        ]
+    }))
     for user in users:
         _id = user["_id"]
         try:
@@ -34,5 +44,54 @@ def daily():
                 bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
         except KeyError:
             continue
+
+
+@scheduler.scheduled_job("cron", hour=6)
+def t6():
+    users = list(db_operations.find({}, {
+        "$or":
+        [
+            {
+                'schedule': '2'
+            },
+            {
+                'schedule': '3'
+            }
+        ]
+    }))
+    for user in users:
+        _id = user["_id"]
+        try:
+            ref = user['ref']
+            if ref in ["IamLoved", "IamOk", "LetsDoThis"]:
+                audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{ref}.mp3"
+                bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
+        except KeyError:
+            continue
+
+
+@scheduler.scheduled_job("cron", hour=18)
+def t18():
+    users = list(db_operations.find({}, {
+        "$or":
+        [
+            {
+                'schedule': '2'
+            },
+            {
+                'schedule': '3'
+            }
+        ]
+    }))
+    for user in users:
+        _id = user["_id"]
+        try:
+            ref = user['ref']
+            if ref in ["IamLoved", "IamOk", "LetsDoThis"]:
+                audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{ref}.mp3"
+                bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
+        except KeyError:
+            continue
+
 
 scheduler.start()
