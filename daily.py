@@ -24,11 +24,11 @@ scheduler = BlockingScheduler()
 
 @scheduler.scheduled_job("interval", seconds=10)
 def daily():
-    users = db_operations.find({}, {"schedule": "Daily"})
+    users = db_operations.find({}, {"schedule": "None"})
     print(users)
     for user in users:
         _id = user["_id"]
-        audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{user['ref']}.mp3"
+        # audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{user['ref']}.mp3"
         # bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
         r = bot.send_text_message(recipient_id=_id, message="Hello")
         print(r.json())
