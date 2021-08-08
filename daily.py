@@ -28,9 +28,14 @@ def daily():
     print(users)
     for user in users:
         _id = user["_id"]
-        # audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{user['ref']}.mp3"
-        # bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
-        r = bot.send_text_message(recipient_id=_id, message="Hello")
-        print(r.json())
+        try:
+            ref = user['ref']
+            print(ref)
+            if ref in ["IamLoved", "IamOk", "LetsDoThis"]:
+                audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{ref}.mp3"
+                bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
+        except KeyError:
+            continue
+        # bot.send_text_message(recipient_id=_id, message="Hello")
 
 scheduler.start()
