@@ -24,18 +24,15 @@ scheduler = BlockingScheduler()
 
 @scheduler.scheduled_job("cron", hour=12)
 def daily():
-    users = list(db_operations.find({}, {"schedule": "None"}))
-    print(users)
+    users = list(db_operations.find({}, {"schedule": "Daily"}))
     for user in users:
         _id = user["_id"]
         try:
             ref = user['ref']
-            print(ref)
             if ref in ["IamLoved", "IamOk", "LetsDoThis"]:
                 audio_url = f"https://verse-recordings.s3.ap-south-1.amazonaws.com/{_id}/{ref}.mp3"
                 bot.send_audio_url(recipient_id=_id, audio_url=audio_url)
         except KeyError:
             continue
-        # bot.send_text_message(recipient_id=_id, message="Hello")
 
 scheduler.start()
