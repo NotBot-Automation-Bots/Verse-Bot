@@ -83,6 +83,27 @@ def listen_to_playlist(user):
     bot.send_audio_url(recipient_id=user['_id'], audio_url=audio_url)
 
 
+def create_schedule(user):
+    buttons = [
+        {
+            "type":"postback",
+            "title":"Daily",
+            "payload": "Daily"
+        },
+        {
+            "type":"postback",
+            "title": "Two times a day",
+            "payload": "Two times a day"
+        },
+        {
+            "type":"postback",
+            "title": "Three times a day",
+            "payload": "Three times a day"
+        }
+    ]
+    bot.send_button_message(recipient_id=user["_id"], text="Select a schedule", buttons=buttons)
+
+
 @application.route("/list")
 def foo():
     entries = list(db_collections["IamOk"].find())
@@ -165,6 +186,12 @@ def receive_message():
                         
                         elif postbackTitle == "Listen to Playlist":
                             listen_to_playlist(user)
+
+                        elif postbackTitle == "Create Schedule":
+                            create_schedule(user)
+                        
+                        elif postbackTitle == "Daily":
+                            bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 12 PM")
                     
                 elif message.get('message'):
                     userMessage = message['message']
