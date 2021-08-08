@@ -191,6 +191,12 @@ def receive_message():
                             create_schedule(user)
                         
                         elif postbackTitle == "Daily":
+                            updateUser = {
+                                "$set": {
+                                    "schedule": "Daily"
+                                }
+                            }
+                            db_operations.update_one(user, updateUser)
                             bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 12 PM")
                     
                 elif message.get('message'):
