@@ -1,2 +1,2 @@
 web: gunicorn wsgi:application
-clock: python daily.py
+clock: python schedule.py

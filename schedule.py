@@ -20,11 +20,11 @@ db_collections['IamSafe'] = client.FbMessenger.IamSafe
 db_collections['LaborAndDelivery'] = client.FbMessenger.LaborAndDelivery
 db_collections['LetsDoThis'] = client.FbMessenger.LetsDoThis
 
-scheduler = BlockingScheduler()
+scheduler = BlockingScheduler({'apscheduler.timezone': 'US/Eastern'})
 
 @scheduler.scheduled_job("cron", hour=12)
 def t12():
-    users = list(db_operations.find({}, {
+    users = list(db_operations.find({
         "$or":
         [
             {
@@ -48,7 +48,7 @@ def t12():
 
 @scheduler.scheduled_job("cron", hour=6)
 def t6():
-    users = list(db_operations.find({}, {
+    users = list(db_operations.find({
         "$or":
         [
             {
@@ -72,7 +72,7 @@ def t6():
 
 @scheduler.scheduled_job("cron", hour=18)
 def t18():
-    users = list(db_operations.find({}, {
+    users = list(db_operations.find({
         "$or":
         [
             {
