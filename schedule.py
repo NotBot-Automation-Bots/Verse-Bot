@@ -20,7 +20,7 @@ db_collections['IamSafe'] = client.FbMessenger.IamSafe
 db_collections['LaborAndDelivery'] = client.FbMessenger.LaborAndDelivery
 db_collections['LetsDoThis'] = client.FbMessenger.LetsDoThis
 
-scheduler = BlockingScheduler()
+scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Kolkata'})
 
 @scheduler.scheduled_job("cron", hour=12, minute=50)
 def t12():
