@@ -22,7 +22,7 @@ db_collections['LetsDoThis'] = client.FbMessenger.LetsDoThis
 
 scheduler = BlockingScheduler()
 
-@scheduler.scheduled_job("cron", hour=12, minute=43)
+@scheduler.scheduled_job("cron", hour=12, minute=50)
 def t12():
     users = list(db_operations.find({}, {
         "$or":
