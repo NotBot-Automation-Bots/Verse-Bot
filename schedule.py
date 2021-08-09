@@ -24,7 +24,7 @@ scheduler = BlockingScheduler({'apscheduler.timezone': 'Asia/Kolkata'})
 
 @scheduler.scheduled_job("cron", hour=13)
 def t12():
-    users = list(db_operations.find({}, {
+    users = list(db_operations.find({
         "$or":
         [
             {
@@ -48,7 +48,7 @@ def t12():
 
 @scheduler.scheduled_job("cron", hour=6)
 def t6():
-    users = list(db_operations.find({}, {
+    users = list(db_operations.find({
         "$or":
         [
             {
@@ -72,7 +72,7 @@ def t6():
 
 @scheduler.scheduled_job("cron", hour=18)
 def t18():
-    users = list(db_operations.find({}, {
+    users = list(db_operations.find({
         "$or":
         [
             {
