@@ -7,6 +7,7 @@ from flask import Flask, request
 from pymessenger.bot import Bot
 from flask_pymongo import PyMongo
 from pydub import AudioSegment
+from pymongo.errors import DuplicateKeyError
 
 application = Flask(__name__)
 ACCESS_TOKEN = foo.ACCESS_TOKEN
@@ -104,6 +105,17 @@ def create_schedule(user):
     bot.send_button_message(recipient_id=user["_id"], text="Select a schedule", buttons=buttons)
 
 
+def read_all_verses(user):
+    entries = db_collections[user['ref']].find()
+    i = 1
+    for entry in entries:
+        verse = f"\"{entry['verse']}\"\n{entry['ReferenceLf']}, {entry['version']}"
+        bot.send_text_message(recipient_id=user['_id'], message=verse)
+        if i == 10:
+            break
+        i += 1
+
+
 @application.route("/list")
 def foo():
     entries = list(db_collections["IamOk"].find())
@@ -131,10 +143,13 @@ def receive_message():
                 recipient_id = message['sender']['id']
                 user = db_operations.find_one({'_id': int(recipient_id)})
                 if user is None:
-                    new_user = {'_id': int(recipient_id), 'prevBotMsg': "Foo", "schedule": "None"}
-                    db_operations.insert_one(new_user)
-                    user = db_operations.find_one({'_id': int(recipient_id)})
-                    update_user(user)
+                    try:    
+                        new_user = {'_id': int(recipient_id), 'prevBotMsg': "Foo", "schedule": "None"}
+                        db_operations.insert_one(new_user)
+                        user = db_operations.find_one({'_id': int(recipient_id)})
+                        update_user(user)
+                    except DuplicateKeyError:
+                        pass
                 try:
                     prevBotMsg = user['prevBotMsg']
                 except:
@@ -216,6 +231,9 @@ def receive_message():
                             }
                             db_operations.update_one(user, updateUser)
                             bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 6 AM, 12 PM, and 6 PM")
+                        
+                        elif postbackTitle == "Read All Verses":
+                            read_all_verses(user)
                     
                 elif message.get('message'):
                     userMessage = message['message']
