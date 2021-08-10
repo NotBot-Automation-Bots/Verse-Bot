@@ -7,6 +7,7 @@ from flask import Flask, request
 from pymessenger.bot import Bot
 from flask_pymongo import PyMongo
 from pydub import AudioSegment
+from pymongo.errors import DuplicateKeyError
 
 application = Flask(__name__)
 ACCESS_TOKEN = foo.ACCESS_TOKEN
@@ -142,10 +143,13 @@ def receive_message():
                 recipient_id = message['sender']['id']
                 user = db_operations.find_one({'_id': int(recipient_id)})
                 if user is None:
-                    new_user = {'_id': int(recipient_id), 'prevBotMsg': "Foo", "schedule": "None"}
-                    db_operations.insert_one(new_user)
-                    user = db_operations.find_one({'_id': int(recipient_id)})
-                    update_user(user)
+                    try:    
+                        new_user = {'_id': int(recipient_id), 'prevBotMsg': "Foo", "schedule": "None"}
+                        db_operations.insert_one(new_user)
+                        user = db_operations.find_one({'_id': int(recipient_id)})
+                        update_user(user)
+                    except DuplicateKeyError:
+                        pass
                 try:
                     prevBotMsg = user['prevBotMsg']
                 except:
