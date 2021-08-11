@@ -64,9 +64,13 @@ def listen_to_playlist(user):
                 f.write(r.content)
             files.append(AudioSegment.from_file(f"./{file}", "mp4"))
 
+    silence = AudioSegment.silent(duration=2000)
+    
+    l = len(files)
+    
     playlist = files[0]
-    for i in range(1, len(files)):
-        playlist = playlist + files[i]
+    for i in range(1, l):
+        playlist = playlist + silence + files[i]
     
     playlist.export(f"{collection_name}.mp3", "mp3")
 
@@ -124,6 +128,58 @@ def foo():
     return "success"
 
 
+def send_greetings(user):
+    # Getting the sender's name
+    r = requests.get('https://graph.facebook.com/{}?fields=first_name,last_name,profile_pic&access_token={}'.format(user['_id'], ACCESS_TOKEN)).json()
+    try:
+        first_name = r['first_name']
+        last_name = r['last_name']
+        msg = f"Welcome {first_name} {last_name}!"
+        updateUser = {"$set": {"name": f"{first_name} {last_name}"}}
+        db_operations.update_one(user, updateUser)
+    except KeyError:
+        msg = "Welcome!"
+
+    # Greeting the user
+    bot.send_text_message(recipient_id=user['_id'], message=msg)
+
+
+def send_ref_buttons(user):
+    buttons = [
+        {
+            "type":"postback",
+            "title":"I am Loved",
+            "payload": "IamLoved"
+        },
+        {
+            "type":"postback",
+            "title": "I am Ok",
+            "payload": "IamOk"
+        },
+        {
+            "type":"postback",
+            "title": "Let's do this",
+            "payload": "LetsDoThis"
+        }
+    ]
+    bot.send_button_message(recipient_id=user['_id'], text="Select a category", buttons=buttons)
+
+
+def send_image_text(user, ref):
+    # Sending an image corresponding to the ref value
+    imageURLs = {
+        "IamLoved": "https://i.ibb.co/5Ljc7vX/Whats-App-Image-2021-07-19-at-15-49-57.jpg",
+        "IamOk": "https://i.ibb.co/N2mjWC0/Whats-App-Image-2021-07-31-at-11-19-36-AM.jpg",
+        "LetsDoThis": "https://i.ibb.co/5KwPGs4/Whats-App-Image-2021-07-31-at-11-18-10-AM.jpg"
+    }
+    recipient_id = user['_id']
+    bot.send_image_url(recipient_id=recipient_id, image_url=imageURLs[ref])
+    bot.send_text_message(recipient_id=recipient_id, message="Which verse did you read today?")
+
+    updateUser = {"$set": {"prevBotMsg": "Which verse did you read today?", "ref": ref}}
+    db_operations.update_one(user, updateUser)
+
+
 # We will receive messages that Facebook sends to the bot at this endpoint
 @application.route("/webhooks/facebook/webhook", methods=['GET', 'POST'])
 def receive_message():
@@ -136,6 +192,7 @@ def receive_message():
     else:
         # get whatever message a user sent the bot
         output = request.get_json()
+        print(output)
         for event in output['entry']:
             messaging = event['messaging']
             for message in messaging:
@@ -161,42 +218,16 @@ def receive_message():
                     if postback.get("referral"):
                         # Are there any Messenger ref values in the query parameter
                         if postback['referral'].get('ref'):
+                            send_greetings(user)
                             ref = postback['referral']['ref']
-                            # print(ref)
-                            updateUser = {"$set": {"ref": ref}}
-                            db_operations.update_one(user, updateUser)
+                            send_image_text(user, ref)
 
-                            # Getting the sender's name
-                            r = requests.get('https://graph.facebook.com/{}?fields=first_name,last_name,profile_pic&access_token={}'.format(recipient_id, ACCESS_TOKEN)).json()
-                            try:
-                                first_name = r['first_name']
-                                last_name = r['last_name']
-                                msg = f"Welcome {first_name} {last_name}!"
-                                updateUser = {"$set": {"name": f"{first_name} {last_name}"}}
-                                db_operations.update_one(user, updateUser)
-                            except KeyError:
-                                msg = "Welcome!"
-
-                            # Greeting the user
-                            bot.send_text_message(recipient_id=recipient_id, message=msg)
-
-                            # Sending an image corresponding to the ref value
-                            imageURLs = {
-                                "IamLoved": "https://i.ibb.co/5Ljc7vX/Whats-App-Image-2021-07-19-at-15-49-57.jpg",
-                                "IamOk": "https://i.ibb.co/N2mjWC0/Whats-App-Image-2021-07-31-at-11-19-36-AM.jpg",
-                                "LetsDoThis": "https://i.ibb.co/5KwPGs4/Whats-App-Image-2021-07-31-at-11-18-10-AM.jpg"
-                            }
-                            bot.send_image_url(recipient_id=recipient_id, image_url=imageURLs[ref])
-                            bot.send_text_message(recipient_id=recipient_id, message="Which verse did you read today?")
-
-                            updateUser = {"$set": {"prevBotMsg": "Which verse did you read today?"}}
-                            db_operations.update_one(user, updateUser)
                     else:
                         postbackTitle = message['postback']['title']
+
                         if postbackTitle == "Record":
                             updateUser = {"$set": {"prevBotMsg": "Nice! Send your recording of this verse"}}
                             db_operations.update_one(user, updateUser)
-
                             bot.send_text_message(recipient_id=recipient_id, message="Nice! Send your recording of this verse")
                         
                         elif postbackTitle == "Listen to Playlist":
@@ -206,39 +237,38 @@ def receive_message():
                             create_schedule(user)
                         
                         elif postbackTitle == "Daily":
-                            updateUser = {
-                                "$set": {
-                                    "schedule": "Daily"
-                                }
-                            }
+                            updateUser = {"$set": {"schedule": "Daily"}}
                             db_operations.update_one(user, updateUser)
                             bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 12 PM")
                         
                         elif postbackTitle == "Two times a day":
-                            updateUser = {
-                                "$set": {
-                                    "schedule": "2"
-                                }
-                            }
+                            updateUser = {"$set": {"schedule": "2"}}
                             db_operations.update_one(user, updateUser)
                             bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 6 AM and 6 PM")
                         
                         elif postbackTitle == "Three times a day":
-                            updateUser = {
-                                "$set": {
-                                    "schedule": "3"
-                                }
-                            }
+                            updateUser = {"$set": {"schedule": "3"}}
                             db_operations.update_one(user, updateUser)
                             bot.send_text_message(recipient_id=recipient_id, message="You'll get a playlist reminder everyday at 6 AM, 12 PM, and 6 PM")
                         
                         elif postbackTitle == "Read All Verses":
                             read_all_verses(user)
-                    
+                        
+                        elif postbackTitle in ["I am Loved", "I am Ok", "Let's do this"]:
+                            payload = message['postback']['payload']
+                            send_image_text(user, payload)
+                        
+                        elif postbackTitle == "Get Started":
+                            send_greetings(user)
+                            send_ref_buttons(user)
+
                 elif message.get('message'):
                     userMessage = message['message']
+                    if userMessage.get("text") and userMessage['text'].lower() in ["hi", "hey", "hello"]:
+                        send_greetings(user)
+                        send_ref_buttons(user)
                     # User enters a verse
-                    if "Which verse did you read today" in prevBotMsg:
+                    elif "Which verse did you read today" in prevBotMsg:
                         for collection_name in db_collections:
                             enteredVerse = userMessage['text']
                             verse_doc = db_collections[collection_name].find_one({
@@ -256,8 +286,6 @@ def receive_message():
                             if verse_doc is not None:
                                 verse_doc['ref'] = collection_name
                                 break
-
-                        # print(verse_doc)
 
                         if verse_doc is not None:
                             verse = f"\"{verse_doc['verse']}\"\n{verse_doc['ReferenceLf']}, {verse_doc['version']}"
@@ -279,8 +307,7 @@ def receive_message():
                             updateUser = {"$set": {"verse_id": verse_doc["_id"], "ref": verse_doc['ref']}}
                             db_operations.update_one(user, updateUser)
 
-                            r = bot.send_button_message(recipient_id=recipient_id, text="Record this verse and your declaration", buttons=buttons)
-                            # print(r)
+                            bot.send_button_message(recipient_id=recipient_id, text="Record this verse and your declaration", buttons=buttons)
 
                     elif "Nice!" in prevBotMsg:
                         if userMessage.get("attachments"):
