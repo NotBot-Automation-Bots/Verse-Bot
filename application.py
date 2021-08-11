@@ -64,9 +64,19 @@ def listen_to_playlist(user):
                 f.write(r.content)
             files.append(AudioSegment.from_file(f"./{file}", "mp4"))
 
+    r = requests.get(url="https://verse-recordings.s3.ap-south-1.amazonaws.com/2-seconds-of-silence.mp3")
+    file = "2-seconds-of-silence.mp3"
+    with open(f"./{file}",'wb') as f:
+        f.write(r.content)
+    files.append(AudioSegment.from_file(f"./{file}", "mp4"))
+    
+    l = len(files)
+    
+    silence = AudioSegment.from_mp3(files[l - 1])
+    
     playlist = files[0]
-    for i in range(1, len(files)):
-        playlist = playlist + files[i]
+    for i in range(1, l - 1):
+        playlist = playlist + silence + files[i]
     
     playlist.export(f"{collection_name}.mp3", "mp3")
 
