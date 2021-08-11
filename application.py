@@ -237,8 +237,34 @@ def receive_message():
                     
                 elif message.get('message'):
                     userMessage = message['message']
+                    if userMessage['text'].lower() in ["hi", "hey", "hello"]:
+                        # Getting the sender's name
+                        r = requests.get('https://graph.facebook.com/{}?fields=first_name,last_name,profile_pic&access_token={}'.format(recipient_id, ACCESS_TOKEN)).json()
+                        try:
+                            first_name = r['first_name']
+                            last_name = r['last_name']
+                            msg = f"Welcome {first_name} {last_name}!"
+                            updateUser = {"$set": {"name": f"{first_name} {last_name}"}}
+                            db_operations.update_one(user, updateUser)
+                        except KeyError:
+                            msg = "Welcome!"
+
+                        # Greeting the user
+                        bot.send_text_message(recipient_id=recipient_id, message=msg)
+
+                        # Sending an image corresponding to the ref value
+                        imageURLs = {
+                            "IamLoved": "https://i.ibb.co/5Ljc7vX/Whats-App-Image-2021-07-19-at-15-49-57.jpg",
+                            "IamOk": "https://i.ibb.co/N2mjWC0/Whats-App-Image-2021-07-31-at-11-19-36-AM.jpg",
+                            "LetsDoThis": "https://i.ibb.co/5KwPGs4/Whats-App-Image-2021-07-31-at-11-18-10-AM.jpg"
+                        }
+                        bot.send_image_url(recipient_id=recipient_id, image_url=imageURLs[ref])
+                        bot.send_text_message(recipient_id=recipient_id, message="Which verse did you read today?")
+
+                        updateUser = {"$set": {"prevBotMsg": "Which verse did you read today?"}}
+                        db_operations.update_one(user, updateUser)
                     # User enters a verse
-                    if "Which verse did you read today" in prevBotMsg:
+                    elif "Which verse did you read today" in prevBotMsg:
                         for collection_name in db_collections:
                             enteredVerse = userMessage['text']
                             verse_doc = db_collections[collection_name].find_one({
