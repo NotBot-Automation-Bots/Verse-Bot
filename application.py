@@ -126,7 +126,7 @@ def foo():
 
 def send_greetings(user):
     # Getting the sender's name
-    r = requests.get('https://graph.facebook.com/{}?fields=first_name,last_name,profile_pic&access_token={}'.format(recipient_id, ACCESS_TOKEN)).json()
+    r = requests.get('https://graph.facebook.com/{}?fields=first_name,last_name,profile_pic&access_token={}'.format(user['_id'], ACCESS_TOKEN)).json()
     try:
         first_name = r['first_name']
         last_name = r['last_name']
@@ -216,7 +216,6 @@ def receive_message():
                         if postback['referral'].get('ref'):
                             send_greetings(user)
                             ref = postback['referral']['ref']
-                            db_operations.update_one(user, updateUser)
                             send_image_text(user, ref)
 
                     else:
@@ -254,10 +253,14 @@ def receive_message():
                         elif postbackTitle in ["I am Loved", "I am Ok", "Let's do this"]:
                             payload = message['postback']['payload']
                             send_image_text(user, payload)
-                    
+                        
+                        elif postbackTitle == "Get Started":
+                            send_greetings(user)
+                            send_ref_buttons(user)
+
                 elif message.get('message'):
                     userMessage = message['message']
-                    if userMessage['text'].lower() in ["hi", "hey", "hello", "get started", "get_started_payload"]:
+                    if userMessage.get("text") and userMessage['text'].lower() in ["hi", "hey", "hello"]:
                         send_greetings(user)
                         send_ref_buttons(user)
                     # User enters a verse
