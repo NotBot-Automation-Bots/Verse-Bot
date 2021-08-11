@@ -231,7 +231,7 @@ def receive_message():
                             bot.send_text_message(recipient_id=recipient_id, message="Nice! Send your recording of this verse")
                         
                         elif postbackTitle == "Hear an example":
-                            bot.send_audio_url(recipient_id=recipient_id, audio_url="https://whatsappbotsoby.s3.ap-south-1.amazonaws.com/Whatsapp+Bot+Saved+Replies/Verse_Declaration_Example.mp3")
+                            bot.send_audio_url(recipient_id=recipient_id, audio_url="https://verse-recordings.s3.ap-south-1.amazonaws.com/Verse_Declaration_Example.mp3")
                         
                         elif postbackTitle == "Listen to Playlist":
                             listen_to_playlist(user)
