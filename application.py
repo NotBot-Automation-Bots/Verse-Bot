@@ -232,6 +232,8 @@ def receive_message():
                         
                         elif postbackTitle == "Hear an example":
                             bot.send_audio_url(recipient_id=recipient_id, audio_url="https://verse-recordings.s3.ap-south-1.amazonaws.com/Verse_Declaration_Example.mp3")
+                            bot.send_text_message(recipient_id=recipient_id, message='Verse: "How precious also are Your thoughts to me, O God! How great is the sum of them! If I should count them, they would be more in number than the sand; When I awake, I am still with You."\nPsalm 139:17-18')
+                            bot.send_text_message(recipient_id=recipient_id, message="Declaration: I am always on God's mind and heart")
                         
                         elif postbackTitle == "Listen to Playlist":
                             listen_to_playlist(user)
